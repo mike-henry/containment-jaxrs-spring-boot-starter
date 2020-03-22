@@ -1,14 +1,15 @@
 package com.spx.containment.general.jaxrs.security.filters;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.spx.containment.general.jaxrs.security.JWTTokenAuthenticator;
 import com.spx.containment.general.jaxrs.security.AuthenticationCreator;
+import com.spx.containment.general.jaxrs.security.JWTTokenAuthenticator;
 import java.io.IOException;
 import java.util.Date;
 import javax.annotation.Priority;
 import javax.security.sasl.AuthenticationException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -16,13 +17,11 @@ import javax.ws.rs.core.Response;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-@Component
 @Priority(Priorities.AUTHENTICATION)
 @Slf4j
-public class OpenIdConnectAuthenticationRequestFilter implements ApplicationRequestFilter {
+public class OpenIdConnectAuthenticationRequestFilter implements ContainerRequestFilter {
 
   private final JWTTokenAuthenticator authenticator;
 
@@ -38,7 +37,7 @@ public class OpenIdConnectAuthenticationRequestFilter implements ApplicationRequ
   @SneakyThrows
   @Override
   public void filter(ContainerRequestContext context) throws IOException {
-    System.err.println("FILTERING");
+    log.debug("openid  connect authentication filtering");
     if (context.getMethod()
         .equals("OPTIONS")) {
       return;

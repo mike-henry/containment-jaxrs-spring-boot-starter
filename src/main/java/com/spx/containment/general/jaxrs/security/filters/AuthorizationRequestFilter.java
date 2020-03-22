@@ -10,6 +10,7 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -19,22 +20,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 
-@Component
+
 @Priority(Priorities.AUTHORIZATION)
-public class AuthorizationRequestFilter implements ApplicationRequestFilter {
-
+public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
 
-  // private final JWTTokenAuthenticator authenticator;
   private final ResourceInfo resourceInfo;
-
 
   public AuthorizationRequestFilter(@Autowired JWTTokenAuthenticator authenticator,
       @Context ResourceInfo resourceInfo) {
-    // this.authenticator = authenticator;
     this.resourceInfo = resourceInfo;
     logger.debug("constructing oauth 2.0 JWT authorization token filter");
   }
@@ -43,8 +39,7 @@ public class AuthorizationRequestFilter implements ApplicationRequestFilter {
   @Override
   public void filter(ContainerRequestContext context) {
     try {
-      if (resourceInfo.getResourceMethod()
-          .getAnnotation(PermitAll.class) != null) {
+      if (isPermitAllMethod()) {
         return;
       }
       checkDenyAllOnMethodOrClass();
@@ -57,6 +52,11 @@ public class AuthorizationRequestFilter implements ApplicationRequestFilter {
           .build());
     }
 
+  }
+
+  private boolean isPermitAllMethod() {
+    return resourceInfo.getResourceMethod()
+        .getAnnotation(PermitAll.class) != null;
   }
 
   private void checkRolesAllowedOnMethodOrClass(
