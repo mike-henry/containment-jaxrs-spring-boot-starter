@@ -175,7 +175,16 @@
     </dependency>
   </dependencies>
 
-
+  <distributionManagement>
+    <repository>
+      <id>nexus-releases</id>
+      <url>${env.REPO_RELEASE_URL}</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>${env.REPO_SNAPSHOT_URL}</url>
+    </snapshotRepository>
+  </distributionManagement>
 
 
 
