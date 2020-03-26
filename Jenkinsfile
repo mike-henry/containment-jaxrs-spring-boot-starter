@@ -1,22 +1,17 @@
 pipeline {
     agent any
     tools {
-
         maven 'maven_3'
-
     }
     environment {
-
-
         PROJECT_NAME = "containment-jaxrs-spring-boot-starter"
-
-        SETTINGS_XML = './settings.xml'
+        GRADLE_PROPERTIES = './gradle.properties'
     }
 
     stages {
         stage('Initialise') {
             steps {
-              configFileProvider([configFile(fileId: 'e1e9d5d0-3f70-410e-a096-38585ed36d99', variable: 'MAVEN_SETTINGS_FILE')]){
+              configFileProvider([configFile(fileId: 'ce4190e5-99fe-411b-82ce-0fb8d9b123a1', variable: 'GRADLE_PROPERTY_FILE')]){
                 echo '.Initialising..'
 
                 sh '''
@@ -24,8 +19,8 @@ pipeline {
                  echo "M2_HOME = ${M2_HOME}"
                  echo "MAVEN_HOME = ${MAVEN_HOME}"
                  echo "JAVA_HOME = ${JAVA_HOME}"
-                 cp  ${MAVEN_SETTINGS_FILE} ${SETTINGS_XML}
 
+                 cp  ${GRADLE_PROPERTY_FILE} ${GRADLE_PROPERTIES}
                  '''
               }
             }
@@ -33,20 +28,22 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'mvn -s ${SETTINGS_XML} clean compile'
-                
+
+                sh './gradlew clean build'
             }
         }
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'mvn  -s ${SETTINGS_XML} test'
+
+                 sh './gradlew test'
             }
         }
         stage('Package') {
             steps {
                 echo 'Packaging..'
-                sh "mvn -s ${SETTINGS_XML} package -DskipTests=true"
+
+                sh './gradlew assemble'
             }
         }
 
@@ -57,7 +54,8 @@ pipeline {
             }
             steps {
                 echo 'Deploying.. library'
-                sh "mvn -s ${SETTINGS_XML} deploy -DskipTests=true"
+
+                sh './gradlew publish'
             }
         }
     }
